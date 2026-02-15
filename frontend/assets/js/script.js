@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const errorToast = document.getElementById('error-toast');
     const errorMsg = document.getElementById('error-msg');
 
-    const API_URL = 'http://127.0.0.1:8000/mask/';
+    const API_URL = 'https://aadhaar-mask-api.onrender.com/mask/';
 
     // Trigger file input on click
     dropZone.addEventListener('click', () => fileInput.click());

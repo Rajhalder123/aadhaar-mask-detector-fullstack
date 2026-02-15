@@ -1,0 +1,88 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Aadhaar Shield | AI Masking</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="assets/css/style.css">
+</head>
+
+<body>
+    <div class="background-blobs">
+        <div class="blob blob-1"></div>
+        <div class="blob blob-2"></div>
+        <div class="blob blob-3"></div>
+    </div>
+
+    <main class="container">
+        <header>
+            <div class="logo">
+                <i class="fa-solid fa-shield-halved"></i>
+                <span>Aadhaar Shield</span>
+            </div>
+            <p class="subtitle">Secure AI-Powered Redaction System</p>
+        </header>
+
+        <section class="upload-section">
+            <div class="glass-card upload-area" id="drop-zone">
+                <div class="icon-container">
+                    <i class="fa-solid fa-cloud-arrow-up"></i>
+                </div>
+                <h3>Upload Aadhaar Card</h3>
+                <p>Drag & drop your file here or <span>browse</span></p>
+                <input type="file" id="file-input" accept="image/png, image/jpeg, image/jpg" hidden>
+                <p class="support-text">Supports: JPEG, PNG</p>
+            </div>
+        </section>
+
+        <!-- Preview & Loader Section -->
+        <section class="processing-section hidden" id="processing-section">
+            <div class="glass-card preview-card">
+                <div class="image-wrapper">
+                    <img id="preview-img" src="" alt="Original Preview">
+                    <div class="loader-overlay hidden" id="loader">
+                        <div class="spinner"></div>
+                        <p>Scanning & Masking...</p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Result Section -->
+        <section class="result-section hidden" id="result-section">
+            <div class="glass-card result-card">
+                <div class="result-header">
+                    <h3><i class="fa-solid fa-check-circle"></i> Masking Complete</h3>
+                    <button class="close-btn" id="reset-btn"><i class="fa-solid fa-rotate-right"></i> New Scan</button>
+                </div>
+                <div class="image-wrapper result-wrapper">
+                    <img id="result-img" src="" alt="Masked Result">
+                </div>
+                <div class="actions">
+                    <a id="download-btn" href="#" download="masked-aadhaar.png" class="btn primary-btn">
+                        <i class="fa-solid fa-download"></i> Download Secure Image
+                    </a>
+                </div>
+            </div>
+        </section>
+
+        <!-- Error Toast -->
+        <div class="toast hidden" id="error-toast">
+            <i class="fa-solid fa-circle-exclamation"></i>
+            <span id="error-msg">Something went wrong</span>
+        </div>
+    </main>
+
+    <footer>
+        <p>🔒 Your data is processed locally and securely.</p>
+    </footer>
+
+    <script src="assets/js/script.js"></script>
+</body>
+
+</html>

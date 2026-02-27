@@ -57,9 +57,32 @@
         <section class="result-section hidden" id="result-section">
             <div class="glass-card result-card">
                 <div class="result-header">
-                    <h3><i class="fa-solid fa-check-circle"></i> Masking Complete</h3>
+                    <h3><i class="fa-solid fa-check-circle"></i> Processing Complete</h3>
                     <button class="close-btn" id="reset-btn"><i class="fa-solid fa-rotate-right"></i> New Scan</button>
                 </div>
+
+                <div class="extracted-data-container hidden" id="extracted-data-container">
+                    <h4>Extracted Information</h4>
+                    <div class="data-grid">
+                        <div class="data-item">
+                            <span class="data-label">Name</span>
+                            <span class="data-value" id="ext-name">-</span>
+                        </div>
+                        <div class="data-item">
+                            <span class="data-label">DOB</span>
+                            <span class="data-value" id="ext-dob">-</span>
+                        </div>
+                        <div class="data-item">
+                            <span class="data-label">Gender</span>
+                            <span class="data-value" id="ext-gender">-</span>
+                        </div>
+                        <div class="data-item full-width">
+                            <span class="data-label">Age</span>
+                            <span class="data-value" id="ext-age">-</span>
+                        </div>
+                    </div>
+                </div>
+
                 <div class="image-wrapper result-wrapper">
                     <img id="result-img" src="" alt="Masked Result">
                 </div>

@@ -48,6 +48,7 @@ document.addEventListener('DOMContentLoaded', () => {
         dropZone.style.display = 'block';
         processingSection.classList.add('hidden');
         fileInput.value = ''; // Reset input
+        document.getElementById('extracted-data-container').classList.add('hidden');
     });
 
     function handleFile(file) {
@@ -85,12 +86,25 @@ document.addEventListener('DOMContentLoaded', () => {
                 throw new Error('Server Failed to Process Image');
             }
 
-            const blob = await response.blob();
-            const imageUrl = URL.createObjectURL(blob);
+            const data = await response.json();
+
+            // Reconstruct Image
+            const imageUrl = `data:image/png;base64,${data.masked_image}`;
 
             // Update Result
             resultImg.src = imageUrl;
             downloadBtn.href = imageUrl;
+
+            // Update Extracted Data
+            if (data.extracted_data) {
+                document.getElementById('extracted-data-container').classList.remove('hidden');
+                document.getElementById('ext-name').textContent = data.extracted_data.name || 'Not Found';
+                document.getElementById('ext-dob').textContent = data.extracted_data.dob || 'Not Found';
+                document.getElementById('ext-gender').textContent = data.extracted_data.gender || 'Not Found';
+                document.getElementById('ext-age').textContent = data.extracted_data.age || 'Not Calculated';
+            } else {
+                document.getElementById('extracted-data-container').classList.add('hidden');
+            }
 
             // Show Result Section
             loader.classList.add('hidden');

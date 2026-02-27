@@ -5,7 +5,14 @@ import shutil
 import os
 import cv2
 import numpy as np
+import base64
+import re
+from datetime import datetime
+from dateutil.relativedelta import relativedelta
+import pytesseract
+pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
 from ultralytics import YOLO
+from fastapi.responses import JSONResponse
 
 app = FastAPI()
 
@@ -38,6 +45,52 @@ async def mask_image(file: UploadFile = File(...)):
     contents = await file.read()
     nparr = np.frombuffer(contents, np.uint8)
     img = cv2.imdecode(nparr, cv2.IMREAD_COLOR)
+
+    # --- Extract Data using OCR ---
+    extracted_text = pytesseract.image_to_string(img)
+    
+    name, dob, gender, age_str = "Not Found", "Not Found", "Not Found", "Not Calculated"
+    lines = [line.strip() for line in extracted_text.split('\n') if line.strip()]
+    
+    dob_match = re.search(r'(?:DOB|Year of Birth|YOB|Date of Birth|DOB:|DOB /)[^\d]*([\d/A-Za-z-]+)', extracted_text, re.IGNORECASE)
+    if dob_match:
+        dob = dob_match.group(1).strip()
+        
+        # Calculate Age
+        try:
+            parsed_dob = None
+            # Standard DD/MM/YYYY
+            exact_match = re.search(r'(\d{2})/(\d{2})/(\d{4})', dob)
+            if exact_match:
+                parsed_dob = datetime(int(exact_match.group(3)), int(exact_match.group(2)), int(exact_match.group(1)))
+            else:
+                # Year only
+                year_match = re.search(r'(\d{4})', dob)
+                if year_match:
+                    parsed_dob = datetime(int(year_match.group(1)), 1, 1)
+
+            if parsed_dob:
+                today = datetime.now()
+                age = relativedelta(today, parsed_dob)
+                age_str = f"{age.years} Years, {age.months} Months, {age.days} Days"
+        except Exception as e:
+            age_str = "Error calculating age"
+    
+    gender_match = re.search(r'\b(Male|Female|MALE|FEMALE|male|female)\b', extracted_text)
+    if gender_match:
+        gender = gender_match.group(1).capitalize()
+        
+    for i, line in enumerate(lines):
+        if dob_match and dob_match.group(1) in line and i > 0:
+            name_candidate = lines[i-1]
+            if len(name_candidate) > 2 and not any(char.isdigit() for char in name_candidate):
+                name = name_candidate
+                break
+            elif i > 1:
+                name_candidate = lines[i-2]
+                if len(name_candidate) > 2 and not any(char.isdigit() for char in name_candidate):
+                    name = name_candidate
+                    break
 
     # Use imgsz=320 and turn off logging for much faster inference
     results = model.predict(img, imgsz=320, conf=0.3, verbose=False)
@@ -83,14 +136,16 @@ async def mask_image(file: UploadFile = File(...)):
 
     output_path = os.path.join(OUTPUT_FOLDER, "masked_" + file.filename)
     cv2.imwrite(output_path, img)
+    
+    _, buffer = cv2.imencode('.png', img)
+    img_str = base64.b64encode(buffer).decode('utf-8')
 
-    return FileResponse(
-        output_path, 
-        media_type="image/png", 
-        filename="masked_" + file.filename,
-        headers={
-            "Cache-Control": "no-cache, no-store, must-revalidate",
-            "Pragma": "no-cache",
-            "Expires": "0",
+    return JSONResponse(content={
+        "masked_image": img_str,
+        "extracted_data": {
+            "name": name,
+            "dob": dob,
+            "gender": gender,
+            "age": age_str
         }
-    )
+    })

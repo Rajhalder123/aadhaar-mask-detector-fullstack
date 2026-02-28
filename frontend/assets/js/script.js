@@ -13,8 +13,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const errorMsg = document.getElementById('error-msg');
     const extractedContainer = document.getElementById('extracted-data-container');
 
-    // ✅ UPDATED API URL (Render Backend)
-    const API_URL = 'https://aadhaar-mask-api.onrender.com/mask';
+    // ✅ UPDATED API URL (Dynamic based on environment)
+    const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    const PROD_API_URL = 'https://aadhaar-mask-api.onrender.com/mask/';
+    const API_URL = isLocalhost ? 'http://127.0.0.1:8000/mask/' : PROD_API_URL;
 
 
     // ===============================

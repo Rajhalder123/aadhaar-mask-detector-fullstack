@@ -33,6 +33,8 @@ app.add_middleware(
 # =========================
 # Load YOLO Model Once
 # =========================
+# Set YOLO to use the /tmp directory to avoid read-only filesystem errors on Render
+os.environ["YOLO_CONFIG_DIR"] = "/tmp"
 model = YOLO("MIXED_AADHAR_NO_DETECT.pt")
 
 
@@ -41,7 +43,13 @@ def home():
     return {"message": "Aadhar Masking API Running"}
 
 
+@app.options("/mask")
+@app.options("/mask/")
+def mask_options():
+    return JSONResponse(content="OK")
+
 @app.post("/mask")
+@app.post("/mask/")
 async def mask_image(file: UploadFile = File(...)):
 
     try:

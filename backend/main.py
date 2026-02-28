@@ -8,6 +8,13 @@ import re
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 import pytesseract
+import os
+
+# Dynamic Tesseract path for both local (Windows) and deployed (Linux) environments
+if os.name == 'nt':
+    pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
+else:
+    pytesseract.pytesseract.tesseract_cmd = 'tesseract'
 from ultralytics import YOLO
 
 app = FastAPI()
@@ -99,17 +106,35 @@ async def mask_image(file: UploadFile = File(...)):
                 x1, y1, x2, y2 = map(int, box.xyxy[0])
 
                 mask_x2 = x1 + int((x2 - x1) * 0.65)
+                # Fine-tune the horizontal position so it perfectly fills the left 65% width
+                # We need to calculate text dimensions.
+                # Find the size of the text at scale 1.0 to calculate ratio
+                text = "XXXX XXXX"
+                (base_w, base_h), _ = cv2.getTextSize(text, cv2.FONT_HERSHEY_SIMPLEX, 1.0, 1)
+                available_width = (mask_x2 - x1) * 0.90
+                font_scale = available_width / base_w
+                thickness = max(1, int(font_scale * 2.5))
+                (text_width, text_height), baseline = cv2.getTextSize(text, cv2.FONT_HERSHEY_SIMPLEX, font_scale, thickness)
+                
+                # Sample the background color from just above the bounding box (offset by 5 pixels)
+                # to make the mask blend perfectly into the natural paper color of the card.
+                sample_y = max(0, y1 - 5)
+                sample_x = x1 + int((mask_x2 - x1) / 2)
+                bg_color = img[sample_y, sample_x].tolist() # Returns [B, G, R]
+                
+                cv2.rectangle(img, (x1, y1), (mask_x2, y2), bg_color, -1)
 
-                cv2.rectangle(img, (x1, y1), (mask_x2, y2), (255, 255, 255), -1)
+                text_x = x1 + max(0, int(((mask_x2 - x1) - text_width) / 2))
+                text_y = y1 + int(((y2 - y1) + text_height) / 2)
 
                 cv2.putText(
                     img,
-                    "XXXX XXXX",
-                    (x1 + 5, y1 + int((y2 - y1) / 2)),
+                    text,
+                    (text_x, text_y),
                     cv2.FONT_HERSHEY_SIMPLEX,
-                    0.8,
+                    font_scale,
                     (0, 0, 0),
-                    2,
+                    thickness,
                     cv2.LINE_AA
                 )
 
@@ -131,3 +156,8 @@ async def mask_image(file: UploadFile = File(...)):
 
     except Exception as e:
         return JSONResponse(status_code=500, content={"error": str(e)})
+
+if __name__ == "__main__":
+    import uvicorn
+    port = int(os.environ.get("PORT", 8000))
+    uvicorn.run("main:app", host="0.0.0.0", port=port)

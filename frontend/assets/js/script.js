@@ -11,7 +11,10 @@ document.addEventListener('DOMContentLoaded', () => {
     const errorToast = document.getElementById('error-toast');
     const errorMsg = document.getElementById('error-msg');
 
-    const API_URL = 'http://127.0.0.1:8000/mask';
+    const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
+    // REPLACE the URL below with your actual deployed Render URL once you have it.
+    const PROD_API_URL = 'https://YOUR_BACKEND_URL.onrender.com/mask';
+    const API_URL = isLocalhost ? 'http://127.0.0.1:8000/mask' : PROD_API_URL;
 
     // Trigger file input on click
     dropZone.addEventListener('click', () => fileInput.click());

@@ -26,12 +26,23 @@ mkdir -p ~/.apt/usr/lib
 # Download and extract the debian packages for tesseract statically (Guaranteed to work on Ubuntu Jammy)
 cd /tmp
 
-echo "Downloading Tesseract binaries..."
-wget http://archive.ubuntu.com/ubuntu/pool/universe/t/tesseract/tesseract-ocr_4.1.1-2.1build1_amd64.deb
-wget http://archive.ubuntu.com/ubuntu/pool/universe/t/tesseract/libtesseract4_4.1.1-2.1build1_amd64.deb
-wget http://archive.ubuntu.com/ubuntu/pool/universe/t/tesseract-lang/tesseract-ocr-eng_4.00~git30-7274cfa-1_all.deb
-wget http://archive.ubuntu.com/ubuntu/pool/universe/t/tesseract-lang/tesseract-ocr-osd_4.00~git30-7274cfa-1_all.deb
-wget http://archive.ubuntu.com/ubuntu/pool/universe/l/leptonica/liblept5_1.82.0-3build1_amd64.deb
+echo "Fetching latest Tesseract binaries dynamically from Ubuntu archives..."
+python -c "
+import urllib.request
+import re
+import os
+
+packages = ['tesseract-ocr', 'libtesseract4', 'tesseract-ocr-eng', 'tesseract-ocr-osd', 'liblept5']
+for pkg in packages:
+    try:
+        url = f'https://packages.ubuntu.com/jammy/amd64/{pkg}/download'
+        html = urllib.request.urlopen(url).read().decode('utf-8')
+        deb_link = re.search(r'http://mirrors\.kernel\.org/[^\"]+\.deb', html).group(0)
+        print(f'Downloading {deb_link}...')
+        os.system(f'wget -q {deb_link}')
+    except Exception as e:
+        print(f'Failed to download {pkg}: {e}')
+"
 
 # Extract all downloaded deb files into the local apt directory
 for f in *.deb; do dpkg -x "$f" ~/.apt/; done

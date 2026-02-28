@@ -1,4 +1,5 @@
 document.addEventListener('DOMContentLoaded', () => {
+
     const dropZone = document.getElementById('drop-zone');
     const fileInput = document.getElementById('file-input');
     const processingSection = document.getElementById('processing-section');
@@ -10,16 +11,21 @@ document.addEventListener('DOMContentLoaded', () => {
     const resetBtn = document.getElementById('reset-btn');
     const errorToast = document.getElementById('error-toast');
     const errorMsg = document.getElementById('error-msg');
+    const extractedContainer = document.getElementById('extracted-data-container');
 
-    const isLocalhost = window.location.hostname === 'localhost' || window.location.hostname === '127.0.0.1';
-    // REPLACE the URL below with your actual deployed Render URL once you have it.
-    const PROD_API_URL = 'https://YOUR_BACKEND_URL.onrender.com/mask/';
-    const API_URL = isLocalhost ? 'http://127.0.0.1:8000/mask/' : PROD_API_URL;
+    // ✅ UPDATED API URL (Render Backend)
+    const API_URL = 'https://aadhaar-mask-api.onrender.com/mask';
 
-    // Trigger file input on click
+
+    // ===============================
+    // Click to open file dialog
+    // ===============================
     dropZone.addEventListener('click', () => fileInput.click());
 
+
+    // ===============================
     // Drag & Drop Handling
+    // ===============================
     dropZone.addEventListener('dragover', (e) => {
         e.preventDefault();
         dropZone.classList.add('drag-over');
@@ -32,105 +38,140 @@ document.addEventListener('DOMContentLoaded', () => {
     dropZone.addEventListener('drop', (e) => {
         e.preventDefault();
         dropZone.classList.remove('drag-over');
+
         const files = e.dataTransfer.files;
         if (files.length > 0) {
             handleFile(files[0]);
         }
     });
 
+
+    // ===============================
     // File Input Handling
+    // ===============================
     fileInput.addEventListener('change', (e) => {
         if (e.target.files.length > 0) {
             handleFile(e.target.files[0]);
         }
     });
 
+
+    // ===============================
     // Reset Button
+    // ===============================
     resetBtn.addEventListener('click', () => {
         resultSection.classList.add('hidden');
-        dropZone.style.display = 'block';
         processingSection.classList.add('hidden');
-        fileInput.value = ''; // Reset input
-        document.getElementById('extracted-data-container').classList.add('hidden');
+        dropZone.style.display = 'block';
+        extractedContainer.classList.add('hidden');
+        fileInput.value = '';
+        previewImg.src = '';
     });
 
+
+    // ===============================
+    // Handle Selected File
+    // ===============================
     function handleFile(file) {
-        // Validate file type
-        if (!file.type.match('image.*')) {
+
+        // Validate image
+        if (!file.type.startsWith('image/')) {
             showError('Please upload a valid image file (PNG, JPG).');
             return;
         }
 
-        // Show Preview
         const reader = new FileReader();
+
         reader.onload = (e) => {
             previewImg.src = e.target.result;
             dropZone.style.display = 'none';
             processingSection.classList.remove('hidden');
-            loader.classList.remove('hidden'); // Show loader
+            loader.classList.remove('hidden');
 
-            // Upload to API
             uploadImage(file);
         };
+
         reader.readAsDataURL(file);
     }
 
+
+    // ===============================
+    // Upload Image to Backend
+    // ===============================
     async function uploadImage(file) {
+
         const formData = new FormData();
         formData.append('file', file);
 
         try {
+
             const response = await fetch(API_URL, {
                 method: 'POST',
                 body: formData
             });
 
             if (!response.ok) {
-                throw new Error('Server Failed to Process Image');
+                throw new Error('Server failed to process image.');
             }
 
             const data = await response.json();
 
-            // Reconstruct Image
+            if (!data.masked_image) {
+                throw new Error('Invalid response from server.');
+            }
+
+            // Convert base64 to image
             const imageUrl = `data:image/png;base64,${data.masked_image}`;
 
-            // Update Result
             resultImg.src = imageUrl;
             downloadBtn.href = imageUrl;
 
-            // Update Extracted Data
+            // Show extracted data
             if (data.extracted_data) {
-                document.getElementById('extracted-data-container').classList.remove('hidden');
-                document.getElementById('ext-name').textContent = data.extracted_data.name || 'Not Found';
-                document.getElementById('ext-dob').textContent = data.extracted_data.dob || 'Not Found';
-                document.getElementById('ext-gender').textContent = data.extracted_data.gender || 'Not Found';
-                document.getElementById('ext-age').textContent = data.extracted_data.age || 'Not Calculated';
+                extractedContainer.classList.remove('hidden');
+
+                document.getElementById('ext-name').textContent =
+                    data.extracted_data.name || 'Not Found';
+
+                document.getElementById('ext-dob').textContent =
+                    data.extracted_data.dob || 'Not Found';
+
+                document.getElementById('ext-gender').textContent =
+                    data.extracted_data.gender || 'Not Found';
+
+                document.getElementById('ext-age').textContent =
+                    data.extracted_data.age || 'Not Calculated';
             } else {
-                document.getElementById('extracted-data-container').classList.add('hidden');
+                extractedContainer.classList.add('hidden');
             }
 
-            // Show Result Section
+            // Hide loader and show result
             loader.classList.add('hidden');
-            previewImg.src = ''; // Clear preview memory
             processingSection.classList.add('hidden');
             resultSection.classList.remove('hidden');
 
         } catch (error) {
-            console.error(error);
-            showError('Error: ' + error.message);
 
-            // Reset UI on error
+            console.error(error);
+            showError(error.message || 'Something went wrong.');
+
             loader.classList.add('hidden');
             processingSection.classList.add('hidden');
             dropZone.style.display = 'block';
         }
     }
 
+
+    // ===============================
+    // Show Error Toast
+    // ===============================
     function showError(message) {
         errorMsg.textContent = message;
         errorToast.classList.remove('hidden');
+
         setTimeout(() => {
             errorToast.classList.add('hidden');
         }, 4000);
     }
+
 });

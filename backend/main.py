@@ -10,7 +10,13 @@ import re
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
 import pytesseract
-pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
+import os
+
+# Dynamic Tesseract path for both local (Windows) and deployed (Linux) environments
+if os.name == 'nt':
+    pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
+else:
+    pytesseract.pytesseract.tesseract_cmd = 'tesseract'
 from ultralytics import YOLO
 from fastapi.responses import JSONResponse
 
@@ -149,3 +155,8 @@ async def mask_image(file: UploadFile = File(...)):
             "age": age_str
         }
     })
+
+if __name__ == "__main__":
+    import uvicorn
+    port = int(os.environ.get("PORT", 8000))
+    uvicorn.run("main:app", host="0.0.0.0", port=port)

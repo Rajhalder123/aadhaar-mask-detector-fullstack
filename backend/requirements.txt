@@ -59,4 +59,4 @@ ultralytics-thop==2.0.18
 ultralytics==8.4.14
 urllib3==2.6.3
 uvicorn==0.40.0
-ï»¿annotated-doc==0.0.4
+annotated-doc==0.0.4

@@ -18,10 +18,11 @@ wget https://github.com/DanBloomberg/leptonica/releases/download/1.83.1/leptonic
 # Instead, an easier trick on Render native Python is to download the ubuntu deb packages and extract them locally.
 
 # Let's use an established strategy on Render for Python environments:
-# Create a local apt directory
-mkdir -p ~/.apt/usr/bin
-mkdir -p ~/.apt/usr/share/tesseract-ocr/4.00/tessdata
-mkdir -p ~/.apt/usr/lib
+# Create a local apt directory inside the current folder
+export APT_DIR="$PWD/.apt"
+mkdir -p "$APT_DIR/usr/bin"
+mkdir -p "$APT_DIR/usr/share/tesseract-ocr/4.00/tessdata"
+mkdir -p "$APT_DIR/usr/lib"
 
 # Download and extract the debian packages for tesseract statically (Guaranteed to work on Ubuntu Jammy)
 cd /tmp
@@ -50,7 +51,7 @@ for pkg in packages:
 "
 
 # Extract all downloaded deb files into the local apt directory
-for f in *.deb; do dpkg -x "$f" ~/.apt/; done
+for f in *.deb; do dpkg -x "$f" "$APT_DIR/"; done
 
 # Clean up
 rm *.deb

@@ -17,16 +17,21 @@ if os.name == 'nt':
 else:
     # Check if Tesseract is installed via Docker/Global APT or Render's Native Build environment
     docker_tesseract_path = '/usr/bin/tesseract'
-    render_native_tesseract_path = os.path.expanduser('~/.apt/usr/bin/tesseract')
+    
+    # 2. Render Native Python Environment (using build.sh extracted locally)
+    current_dir = os.path.dirname(os.path.abspath(__file__))
+    render_native_tesseract_path = os.path.join(current_dir, '.apt', 'usr', 'bin', 'tesseract')
 
     if os.path.exists(render_native_tesseract_path):
-        # 2. Render Native Python Environment (using build.sh)
-        os.environ['LD_LIBRARY_PATH'] = f"{os.path.expanduser('~/.apt/usr/lib/x86_64-linux-gnu/')}:{os.environ.get('LD_LIBRARY_PATH', '')}"
-        os.environ['TESSDATA_PREFIX'] = os.path.expanduser('~/.apt/usr/share/tesseract-ocr/4.00/tessdata')
+        os.environ['LD_LIBRARY_PATH'] = f"{os.path.join(current_dir, '.apt', 'usr', 'lib', 'x86_64-linux-gnu')}:{os.environ.get('LD_LIBRARY_PATH', '')}"
+        os.environ['TESSDATA_PREFIX'] = os.path.join(current_dir, '.apt', 'usr', 'share', 'tesseract-ocr', '4.00', 'tessdata')
         pytesseract.pytesseract.tesseract_cmd = render_native_tesseract_path
-    else:
+    elif os.path.exists(docker_tesseract_path):
         # 3. Render Docker Environment (from Dockerfile)
         pytesseract.pytesseract.tesseract_cmd = docker_tesseract_path
+    else:
+        # Prevent silent failures and 500 errors by raising a clear startup error
+        raise RuntimeError(f"Tesseract OCR not found. Searched paths:\n1. {render_native_tesseract_path}\n2. {docker_tesseract_path}")
 from ultralytics import YOLO
 
 app = FastAPI()

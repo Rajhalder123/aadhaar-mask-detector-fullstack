@@ -10,14 +10,12 @@ from dateutil.relativedelta import relativedelta
 import pytesseract
 import os
 
-# Dynamic Tesseract path for both local (Windows) and deployed (Linux) environments
+# Dynamic Tesseract path for both local (Windows) and deployed (Linux/Docker) environments
 if os.name == 'nt':
     pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'
 else:
-    # Set path for Render's local apt installation via build.sh
-    os.environ['LD_LIBRARY_PATH'] = f"{os.path.expanduser('~/.apt/usr/lib/x86_64-linux-gnu/')}:{os.environ.get('LD_LIBRARY_PATH', '')}"
-    os.environ['TESSDATA_PREFIX'] = os.path.expanduser('~/.apt/usr/share/tesseract-ocr/4.00/tessdata')
-    pytesseract.pytesseract.tesseract_cmd = os.path.expanduser('~/.apt/usr/bin/tesseract')
+    # In the Docker container, Tesseract is installed globally via apt-get
+    pytesseract.pytesseract.tesseract_cmd = '/usr/bin/tesseract'
 from ultralytics import YOLO
 
 app = FastAPI()

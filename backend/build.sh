@@ -31,17 +31,22 @@ python -c "
 import urllib.request
 import re
 import os
+import sys
 
 packages = ['tesseract-ocr', 'libtesseract4', 'tesseract-ocr-eng', 'tesseract-ocr-osd', 'liblept5']
 for pkg in packages:
     try:
         url = f'https://packages.ubuntu.com/jammy/amd64/{pkg}/download'
-        html = urllib.request.urlopen(url).read().decode('utf-8')
+        req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'})
+        html = urllib.request.urlopen(req).read().decode('utf-8')
         deb_link = re.search(r'http://mirrors\.kernel\.org/[^\"]+\.deb', html).group(0)
         print(f'Downloading {deb_link}...')
-        os.system(f'wget -q {deb_link}')
+        exit_code = os.system(f'wget -q {deb_link}')
+        if exit_code != 0:
+            raise Exception(f'wget exited with code {exit_code}')
     except Exception as e:
         print(f'Failed to download {pkg}: {e}')
+        sys.exit(1)
 "
 
 # Extract all downloaded deb files into the local apt directory

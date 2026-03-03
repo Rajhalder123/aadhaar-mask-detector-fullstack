@@ -52,8 +52,8 @@ app.add_middleware(
 # =========================
 # Set YOLO to use the /tmp directory to avoid read-only filesystem errors on Render
 os.environ["YOLO_CONFIG_DIR"] = "/tmp"
-model = YOLO("MIXED_AADHAR_NO_DETECT.pt")
-
+model_path = os.path.join(os.path.dirname(os.path.abspath(__file__)), "MIXED_AADHAR_NO_DETECT.pt")
+model = YOLO(model_path)
 
 @app.get("/")
 def home():

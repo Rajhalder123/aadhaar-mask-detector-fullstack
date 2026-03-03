@@ -27,28 +27,14 @@ mkdir -p "$APT_DIR/usr/lib"
 # Download and extract the debian packages for tesseract statically (Guaranteed to work on Ubuntu Jammy)
 cd /tmp
 
-echo "Fetching latest Tesseract binaries dynamically from Ubuntu archives..."
-python -c "
-import urllib.request
-import re
-import os
-import sys
+echo "Fetching Tesseract binaries directly from Ubuntu mirrors..."
 
-packages = ['tesseract-ocr', 'libtesseract4', 'tesseract-ocr-eng', 'tesseract-ocr-osd', 'liblept5']
-for pkg in packages:
-    try:
-        url = f'https://packages.ubuntu.com/jammy/amd64/{pkg}/download'
-        req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'})
-        html = urllib.request.urlopen(req).read().decode('utf-8')
-        deb_link = re.search(r'http://[a-zA-Z0-9.\-/_]+\.deb', html).group(0)
-        print(f'Downloading {deb_link}...')
-        exit_code = os.system(f'wget -q {deb_link}')
-        if exit_code != 0:
-            raise Exception(f'wget exited with code {exit_code}')
-    except Exception as e:
-        print(f'Failed to download {pkg}: {e}')
-        sys.exit(1)
-"
+# We bypass packages.ubuntu.com because Render often gets hit with HTTP 500/rate limits
+wget -q http://mirrors.kernel.org/ubuntu/pool/universe/t/tesseract/tesseract-ocr_4.1.1-2.1build1_amd64.deb
+wget -q http://mirrors.kernel.org/ubuntu/pool/universe/t/tesseract/libtesseract4_4.1.1-2.1build1_amd64.deb
+wget -q http://mirrors.kernel.org/ubuntu/pool/main/t/tesseract-lang/tesseract-ocr-eng_4.00~git30-7274cfa-1.1_all.deb
+wget -q http://mirrors.kernel.org/ubuntu/pool/main/t/tesseract-lang/tesseract-ocr-osd_4.00~git30-7274cfa-1.1_all.deb
+wget -q http://mirrors.kernel.org/ubuntu/pool/universe/l/leptonica/liblept5_1.82.0-3build1_amd64.deb
 
 # Extract all downloaded deb files into the local apt directory
 for f in *.deb; do dpkg -x "$f" "$APT_DIR/"; done

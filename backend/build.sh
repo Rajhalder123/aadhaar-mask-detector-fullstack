@@ -32,9 +32,9 @@ echo "Fetching Tesseract binaries directly from Ubuntu mirrors..."
 # We bypass packages.ubuntu.com because Render often gets hit with HTTP 500/rate limits
 wget -q http://mirrors.kernel.org/ubuntu/pool/universe/t/tesseract/tesseract-ocr_4.1.1-2.1build1_amd64.deb
 wget -q http://mirrors.kernel.org/ubuntu/pool/universe/t/tesseract/libtesseract4_4.1.1-2.1build1_amd64.deb
-wget -q http://mirrors.kernel.org/ubuntu/pool/main/t/tesseract-lang/tesseract-ocr-eng_4.00~git30-7274cfa-1.1_all.deb
-wget -q http://mirrors.kernel.org/ubuntu/pool/main/t/tesseract-lang/tesseract-ocr-osd_4.00~git30-7274cfa-1.1_all.deb
-wget -q http://mirrors.kernel.org/ubuntu/pool/universe/l/leptonica/liblept5_1.82.0-3build1_amd64.deb
+wget -q http://mirrors.kernel.org/ubuntu/pool/universe/t/tesseract-lang/tesseract-ocr-eng_4.00~git30-7274cfa-1.1_all.deb
+wget -q http://mirrors.kernel.org/ubuntu/pool/universe/t/tesseract-lang/tesseract-ocr-osd_4.00~git30-7274cfa-1.1_all.deb
+wget -q http://mirrors.kernel.org/ubuntu/pool/universe/l/leptonlib/liblept5_1.82.0-3build1_amd64.deb
 
 # Extract all downloaded deb files into the local apt directory
 for f in *.deb; do dpkg -x "$f" "$APT_DIR/"; done

@@ -24,7 +24,7 @@ else:
 
     if os.path.exists(render_native_tesseract_path):
         os.environ['LD_LIBRARY_PATH'] = f"{os.path.join(current_dir, '.apt', 'usr', 'lib', 'x86_64-linux-gnu')}:{os.environ.get('LD_LIBRARY_PATH', '')}"
-        os.environ['TESSDATA_PREFIX'] = os.path.join(current_dir, '.apt', 'usr', 'share', 'tesseract-ocr', '4.00', 'tessdata')
+        os.environ['TESSDATA_PREFIX'] = os.path.join(current_dir, '.apt', 'usr', 'share', 'tesseract-ocr', '4.00')
         pytesseract.pytesseract.tesseract_cmd = render_native_tesseract_path
     elif os.path.exists(docker_tesseract_path):
         # 3. Render Docker Environment (from Dockerfile)

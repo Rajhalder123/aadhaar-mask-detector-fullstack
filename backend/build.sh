@@ -19,7 +19,7 @@ wget https://github.com/DanBloomberg/leptonica/releases/download/1.83.1/leptonic
 
 # Let's use an established strategy on Render for Python environments:
 # Create a local apt directory inside the current folder
-export APT_DIR="$PWD/.apt"
+export APT_DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )/.apt"
 mkdir -p "$APT_DIR/usr/bin"
 mkdir -p "$APT_DIR/usr/share/tesseract-ocr/4.00/tessdata"
 mkdir -p "$APT_DIR/usr/lib"
@@ -40,7 +40,7 @@ for pkg in packages:
         url = f'https://packages.ubuntu.com/jammy/amd64/{pkg}/download'
         req = urllib.request.Request(url, headers={'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64)'})
         html = urllib.request.urlopen(req).read().decode('utf-8')
-        deb_link = re.search(r'http://mirrors\.kernel\.org/[^\"]+\.deb', html).group(0)
+        deb_link = re.search(r'http://[a-zA-Z0-9.\-/_]+\.deb', html).group(0)
         print(f'Downloading {deb_link}...')
         exit_code = os.system(f'wget -q {deb_link}')
         if exit_code != 0:

@@ -16,8 +16,8 @@ COPY . /app
 RUN pip install --upgrade pip
 RUN pip install --no-cache-dir -r backend/requirements.txt
 
-# Expose port your backend uses
+# Expose port your backend uses (fallback)
 EXPOSE 8000
 
-# Command to run your backend
-CMD ["uvicorn", "backend.main:app", "--host", "0.0.0.0", "--port", "8000"]
+# Command to run your backend using Render's dynamic PORT
+CMD sh -c "uvicorn backend.main:app --host 0.0.0.0 --port ${PORT:-8000}"
